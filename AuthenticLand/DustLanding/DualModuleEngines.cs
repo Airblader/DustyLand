@@ -99,10 +99,6 @@ public class DualModuleEngines {
 /// </summary>
 public static class DualModuleEnginesPartExtensions {
 	public static List<DualModuleEngines> GetDualModuleEngines( this Part part ) {
-		if( part == null ) {
-			return null;
-		}
-
 		List<DualModuleEngines> modules = new List<DualModuleEngines>();
 		foreach( PartModule module in part.Modules ) {
 			DualModuleEngines engineModule = DualModuleEngines.From( module );
