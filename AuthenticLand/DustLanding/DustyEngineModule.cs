@@ -76,15 +76,17 @@ public class DustyEngineModule : PartModule, IDisposable {
 
 			// TODO Don't use infinity, but account for tilted ships
 			RaycastHit thrustTargetOnSurface;
-			Physics.Raycast( part.transform.position, module.thrustTransforms[0].forward, out thrustTargetOnSurface,
-				Mathf.Infinity, LAYER_MASK );
+			bool hit = Physics.Raycast( part.transform.position, module.thrustTransforms[0].forward, out thrustTargetOnSurface,
+				           Mathf.Infinity, LAYER_MASK );
+			emitter.gameObject.SetActive( hit );
 
-			emitter.transform.parent = part.transform;
-			emitter.transform.position = thrustTargetOnSurface.point;
-			emitter.transform.LookAt( module.thrustTransforms[0].position );
-			emitter.transform.Rotate( 90, 0, 0 );
-
-			emitter.gameObject.SetActive( true );
+			if( hit ) {
+				emitter.transform.parent = part.transform;
+				// TODO extract 3 as const
+				emitter.transform.position = thrustTargetOnSurface.point - 5 * module.thrustTransforms[0].forward.normalized;
+				emitter.transform.LookAt( module.thrustTransforms[0].position );
+				emitter.transform.Rotate( 90, 0, 0 );
+			}
 		}
 	}
 
