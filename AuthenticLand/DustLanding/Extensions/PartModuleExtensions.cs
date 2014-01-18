@@ -8,8 +8,8 @@ public static class PartModuleExtensions {
 		throw new NotSupportedException();
 		//return engine.maxThrust * engine.currentThrottle + engine.minThrust * ( 1 - engine.currentThrottle );
 	}
-
-	public static bool HasThrust( this ModuleEngines engine ) {
+	// TODO is not a PartModule extension anymore (not directly, anyway)
+	public static bool HasThrust( this DualModuleEngines engine ) {
 		return engine.currentThrottle > 0.01f;
 	}
 }

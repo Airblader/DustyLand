@@ -10,7 +10,7 @@ public class DustyEngineModule : PartModule, IDisposable {
 	private FXGroup fxDust;
 
 	override public void OnAwake() {
-		if( !part.HasModule<ModuleEngines>() ) {
+		if( !part.HasEngineModule() ) {
 			throw new ApplicationException( "The part is not an engine" );
 		}
 
@@ -48,13 +48,13 @@ public class DustyEngineModule : PartModule, IDisposable {
 	}
 
 	internal void UpdateEmitters() {
-		ModuleEngines engine = GetEngineModule();
+		DualModuleEngines engine = part.GetDualModuleEngines()[0];
 		if( engine == null ) {
 			Logging.Log( "Engine module not found" );
 			return;
 		}
 
-		if( !engine.isEnabled || !engine.EngineIgnited || engine.getFlameoutState || !engine.HasThrust() ) {
+		if( !engine.isEnabled || !engine.isIgnited || engine.isFlameout || !engine.HasThrust() ) {
 			foreach( ParticleEmitter emitter in fxDust.fxEmitters ) {
 				// TODO this will remove the emitters instantly, but it should just go away smoothly
 				// (i.e. just stop emitting and set them to active once all particles are gone)
@@ -90,10 +90,6 @@ public class DustyEngineModule : PartModule, IDisposable {
 				emitter.transform.Rotate( 90, 0, 0 );
 			}
 		}
-	}
-
-	internal ModuleEngines GetEngineModule() {
-		return part.Modules.OfType<ModuleEngines>().First();
 	}
 
 	internal void InitFx() {
