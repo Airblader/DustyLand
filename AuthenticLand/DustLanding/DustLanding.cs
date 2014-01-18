@@ -9,7 +9,7 @@ using KSP;
 public class DustLanding : MonoBehaviour {
 	private Vessel vessel;
 
-	private void FixedUpdate() {
+	public void FixedUpdate() {
 		if( !FlightGlobals.ready ) {
 			return;
 		}
@@ -24,7 +24,7 @@ public class DustLanding : MonoBehaviour {
 		}
 	}
 
-	internal bool UpdateVessel() {
+	private bool UpdateVessel() {
 		if( FlightGlobals.fetch.activeVessel != vessel ) {
 			vessel = FlightGlobals.fetch.activeVessel;
 			return true;
@@ -33,7 +33,7 @@ public class DustLanding : MonoBehaviour {
 		return false;
 	}
 
-	internal void SetupEmitters() {
+	private void SetupEmitters() {
 		foreach( Part part in vessel.parts ) {
 			if( !part.HasEngineModule() || part.HasModule<DustyEngineModule>() ) {
 				continue;
@@ -48,7 +48,7 @@ public class DustLanding : MonoBehaviour {
 	/// <summary>
 	/// Taken from https://github.com/Ialdabaoth/ModuleManager/blob/master/moduleManager.cs
 	/// </summary>
-	internal bool Awaken( PartModule module ) {
+	private bool Awaken( PartModule module ) {
 		MethodInfo awakeMethod = typeof( PartModule ).GetMethod( "Awake", BindingFlags.Instance | BindingFlags.NonPublic );
 		if( awakeMethod == null ) {
 			return false;
