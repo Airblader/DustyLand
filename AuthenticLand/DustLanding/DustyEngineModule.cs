@@ -33,7 +33,6 @@ public class DustyEngineModule : PartModule, IDisposable {
 	override public void OnFixedUpdate() {
 		// TODO do Awake, OnStart here?
 		if( !FlightGlobals.ready ) {
-			Logging.Log( "Not yet ready, aborting" );
 			return;
 		}
 
@@ -49,47 +48,44 @@ public class DustyEngineModule : PartModule, IDisposable {
 	}
 
 	internal void UpdateEmitters() {
-		ModuleEngines module = GetEngineModule();
-		if( module == null ) {
+		ModuleEngines engine = GetEngineModule();
+		if( engine == null ) {
 			Logging.Log( "Engine module not found" );
 			return;
 		}
 
-		// TODO check if there's any thrust
-		if( !module.isEnabled ) {
-			Logging.Log( "Module is not enabled, turning off dust effects" );
-
+		if( !engine.isEnabled || !engine.EngineIgnited || engine.getFlameoutState || !engine.HasThrust() ) {
 			foreach( ParticleEmitter emitter in fxDust.fxEmitters ) {
+				// TODO this will remove the emitters instantly, but it should just go away smoothly
+				// (i.e. just stop emitting and set them to active once all particles are gone)
 				emitter.gameObject.SetActive( false );
 			}
 
 			return;
 		}
 
-		Logging.Log( "Updating particle emitters" );
-
 		foreach( ParticleEmitter emitter in fxDust.fxEmitters ) {
 			// TODO remove this and add emitters for all thrusters
-			if( module.thrustTransforms.Count == 0 ) {
+			if( engine.thrustTransforms.Count == 0 ) {
 				continue;
 			}
 
 			// TODO Don't use infinity, but account for tilted ships
 			RaycastHit thrustTargetOnSurface;
-			bool hit = Physics.Raycast( part.transform.position, module.thrustTransforms[0].forward, out thrustTargetOnSurface,
+			bool hit = Physics.Raycast( part.transform.position, engine.thrustTransforms[0].forward, out thrustTargetOnSurface,
 				           Mathf.Infinity, LAYER_MASK );
 			emitter.gameObject.SetActive( hit );
 
 			if( hit ) {
 				emitter.transform.parent = part.transform;
-				emitter.transform.position = thrustTargetOnSurface.point - 0.5f * module.thrustTransforms[0].forward.normalized;
+				emitter.transform.position = thrustTargetOnSurface.point - 0.5f * engine.thrustTransforms[0].forward.normalized;
 
 				// TODO reuse this when setting localVelocity here
 				//float angle = Vector3.Angle( module.thrustTransforms[0].eulerAngles, thrustTargetOnSurface.normal );
 				//emitter.transform.Rotate( 90, 90 - angle, 0 );
 
 				// TODO currently has no effect because localVelocity = 0
-				emitter.transform.LookAt( module.thrustTransforms[0].position );
+				emitter.transform.LookAt( engine.thrustTransforms[0].position );
 				// TODO account for this when setting localVelocity
 				emitter.transform.Rotate( 90, 0, 0 );
 			}
@@ -108,6 +104,7 @@ public class DustyEngineModule : PartModule, IDisposable {
 		}
 
 		fxDust = new FXGroup( vessel.vesselName );
+		// TODO maybe use a set of ~8 emitters arranged in a circle
 		fxDust.fxEmitters.Add( CreateParticleEmitter( "fx_smokeTrail_medium" ) );
 	}
 

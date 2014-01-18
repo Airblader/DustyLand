@@ -37,6 +37,7 @@
     <Compile Include="DustyEngineModule.cs" />
     <Compile Include="Extensions\StartStateExtensions.cs" />
     <Compile Include="Log\Logging.cs" />
+    <Compile Include="Extensions\PartModuleExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

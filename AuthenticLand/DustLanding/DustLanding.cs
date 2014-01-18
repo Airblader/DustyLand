@@ -35,6 +35,7 @@ public class DustLanding : MonoBehaviour {
 
 	internal void SetupEmitters() {
 		foreach( Part part in vessel.parts ) {
+			// TODO support ModuleEnginesFX (add a common interface)
 			if( !part.HasModule<ModuleEngines>() || part.HasModule<DustyEngineModule>() ) {
 				continue;
 			}
