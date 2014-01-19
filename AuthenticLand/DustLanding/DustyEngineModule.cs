@@ -47,7 +47,7 @@ public class DustyEngineModule : PartModule, IDisposable {
 		DestroyFx();
 	}
 
-	internal void UpdateEmitters() {
+	private void UpdateEmitters() {
 		DualModuleEngines engine = part.GetDualModuleEngines()[0];
 		if( engine == null ) {
 			Logging.Log( "Engine module not found" );
@@ -74,6 +74,7 @@ public class DustyEngineModule : PartModule, IDisposable {
 			RaycastHit thrustTargetOnSurface;
 			bool hit = Physics.Raycast( part.transform.position, engine.thrustTransforms[0].forward, out thrustTargetOnSurface,
 				           Mathf.Infinity, LAYER_MASK );
+			// TODO consider distance, too
 			emitter.gameObject.SetActive( hit );
 
 			if( hit ) {
@@ -92,7 +93,7 @@ public class DustyEngineModule : PartModule, IDisposable {
 		}
 	}
 
-	internal void InitFx() {
+	private void InitFx() {
 		Logging.Log( "Initialize particle emitters" );
 
 		if( fxDust != null ) {
@@ -104,7 +105,7 @@ public class DustyEngineModule : PartModule, IDisposable {
 		fxDust.fxEmitters.Add( CreateParticleEmitter( "fx_smokeTrail_medium" ) );
 	}
 
-	internal ParticleEmitter CreateParticleEmitter( string fxName ) {
+	private ParticleEmitter CreateParticleEmitter( string fxName ) {
 		GameObject emitterGameObject = (GameObject) UnityEngine.Object.Instantiate( UnityEngine.Resources.Load( "Effects/" + fxName ) );
 		emitterGameObject.transform.parent = part.transform;
 		emitterGameObject.transform.localRotation = Quaternion.identity;
@@ -124,7 +125,7 @@ public class DustyEngineModule : PartModule, IDisposable {
 		return emitter;
 	}
 
-	internal void DestroyFx() {
+	private void DestroyFx() {
 		foreach( ParticleEmitter emitter in fxDust.fxEmitters ) {
 			GameObject.DestroyImmediate( emitter );
 		}
