@@ -36,7 +36,11 @@ public class DustyEngineModule : PartModule, IDisposable {
 			return;
 		}
 
-		UpdateEmitters();
+		try {
+			UpdateEmitters();
+		} catch( Exception e ) {
+			Logging.Error( "Exception while updating emitters", e );
+		}
 	}
 
 	public void Dispose() {
