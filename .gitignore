@@ -1,3 +1,6 @@
 *.log
 *.swp
 *.userprefs
+
+**/Release
+**/Debug
