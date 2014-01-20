@@ -69,31 +69,35 @@ public class DustyEngineModule : PartModule, IDisposable {
 		}
 
 		foreach( ParticleEmitter emitter in fxDust.fxEmitters ) {
-			// TODO remove this and add emitters for all thrusters
-			if( engine.thrustTransforms.Count == 0 ) {
-				continue;
-			}
+			UpdateEmitter( emitter, engine );
+		}
+	}
 
-			// TODO Don't use infinity, but account for tilted ships
-			RaycastHit thrustTargetOnSurface;
-			bool hit = Physics.Raycast( part.transform.position, engine.thrustTransforms[0].forward, out thrustTargetOnSurface,
-				           Mathf.Infinity, LAYER_MASK );
-			// TODO consider distance, too
-			emitter.gameObject.SetActive( hit );
+	private void UpdateEmitter( ParticleEmitter emitter, DualModuleEngines engine ) {
+		// TODO remove this and add emitters for all thrusters
+		if( engine.thrustTransforms.Count == 0 ) {
+			return;
+		}
 
-			if( hit ) {
-				emitter.transform.parent = part.transform;
-				emitter.transform.position = thrustTargetOnSurface.point - 0.5f * engine.thrustTransforms[0].forward.normalized;
+		// TODO Don't use infinity, but account for tilted ships
+		RaycastHit thrustTargetOnSurface;
+		bool hit = Physics.Raycast( part.transform.position, engine.thrustTransforms[0].forward, out thrustTargetOnSurface,
+			           Mathf.Infinity, LAYER_MASK );
+		// TODO consider distance, too
+		emitter.gameObject.SetActive( hit );
 
-				// TODO reuse this when setting localVelocity here
-				//float angle = Vector3.Angle( module.thrustTransforms[0].eulerAngles, thrustTargetOnSurface.normal );
-				//emitter.transform.Rotate( 90, 90 - angle, 0 );
+		if( hit ) {
+			emitter.transform.parent = part.transform;
+			emitter.transform.position = thrustTargetOnSurface.point - 0.5f * engine.thrustTransforms[0].forward.normalized;
 
-				// TODO currently has no effect because localVelocity = 0
-				emitter.transform.LookAt( engine.thrustTransforms[0].position );
-				// TODO account for this when setting localVelocity
-				emitter.transform.Rotate( 90, 0, 0 );
-			}
+			// TODO reuse this when setting localVelocity here
+			//float angle = Vector3.Angle( module.thrustTransforms[0].eulerAngles, thrustTargetOnSurface.normal );
+			//emitter.transform.Rotate( 90, 90 - angle, 0 );
+
+			// TODO currently has no effect because localVelocity = 0
+			emitter.transform.LookAt( engine.thrustTransforms[0].position );
+			// TODO account for this when setting localVelocity
+			emitter.transform.Rotate( 90, 0, 0 );
 		}
 	}
 
