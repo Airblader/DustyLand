@@ -4,6 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using KSP;
 
+/// Plan:
+/// -1. test thrustTransform length
+///  1. Rename this to DustyEngineWatcher
+/// 	- it creates a DustyEngine on each module if it doesn't exist
+///  2. Create MonoBehaviour DustyEngine
+/// 	- knows about the part it is attached to
+/// 	- controls the emitters
+
 public class DustyEngineModule : PartModule, IDisposable {
 	public const string MODULE_NAME = "DustyEngineModule";
 	private const int LAYER_MASK = 1 << 15;
