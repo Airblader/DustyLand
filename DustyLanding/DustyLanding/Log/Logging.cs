@@ -1,7 +1,15 @@
+#define DEBUG
+
 using System;
 using UnityEngine;
 
 public static class Logging {
+	public static void Trace( string message ) {
+		#if DEBUG
+		Log( message );
+		#endif
+	}
+
 	public static void Log( string message ) {
 		Debug.Log( FormatMessage( message ) );
 	}
