@@ -35,13 +35,13 @@ public class DustLanding : MonoBehaviour {
 
 	private void SetupEmitters() {
 		foreach( Part part in vessel.parts ) {
-			if( !part.HasEngineModule() || part.HasModule<DustyEngineModule>() ) {
+			if( !part.HasEngineModule() || part.HasModule<DustyPartModule>() ) {
 				continue;
 			}
 
 			// TODO is Awaken still needed? Doesn't seem like it
 			//Awaken( part.AddModule( DustyEngineModule.MODULE_NAME ) );
-			part.AddModule( DustyEngineModule.MODULE_NAME );
+			part.AddModule( DustyPartModule.MODULE_NAME );
 		}
 	}
 

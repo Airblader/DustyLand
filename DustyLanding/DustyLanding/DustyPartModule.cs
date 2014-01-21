@@ -12,8 +12,8 @@ using KSP;
 /// 	- knows about the part it is attached to
 /// 	- controls the emitters
 
-public class DustyEngineModule : PartModule, IDisposable {
-	public const string MODULE_NAME = "DustyEngineModule";
+public class DustyPartModule : PartModule, IDisposable {
+	public const string MODULE_NAME = "DustyPartModule";
 	private const int LAYER_MASK = 1 << 15;
 	private FXGroup fxDust;
 
