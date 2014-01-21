@@ -5,12 +5,12 @@ using UnityEngine;
 using KSP;
 
 /// Plan:
-/// -1. test thrustTransform length
-///  1. Rename this to DustyEngineWatcher
-/// 	- it creates a DustyEngine on each module if it doesn't exist
-///  2. Create MonoBehaviour DustyEngine
-/// 	- knows about the part it is attached to
-/// 	- controls the emitters
+/// 1. The main MonoBehaviour shall frequently query all parts of the ship
+/// 	- If any part with an engine module is found that does not yet have a
+/// 	  dusty engine, it shall be added
+/// 	- Otherwise, nothing
+/// 2. The dusty engine module goes over every attached engine module and
+///    collects the thrust transforms to display emitters accordingly.
 
 public class DustyPartModule : PartModule, IDisposable {
 	public const string MODULE_NAME = "DustyPartModule";
