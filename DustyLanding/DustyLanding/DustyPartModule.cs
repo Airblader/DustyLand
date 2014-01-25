@@ -10,12 +10,12 @@ public class DustyPartModule : PartModule {
 	private List<EngineEmitters> engines = new List<EngineEmitters>();
 
 	override public void OnAwake() {
-		Logging.Trace( "Woke up for part = " + part.name ?? "<unknown>" );
+		Logging.Log( String.Format( "Waking up for part {0} [{1}]", part.name, part.GetHashCode() ) );
 		InvokeRepeating( "Process", 0.0f, 0.1f );
 	}
 
 	private void Process() {
-		Logging.Trace( "Processing for part " + part.name ?? "<unknown>" );
+		Logging.Trace( String.Format( "Processing part {0} [{1}]", part.name, part.GetHashCode() ) );
 		if( !FlightGlobals.ready ) {
 			return;
 		}
@@ -25,25 +25,31 @@ public class DustyPartModule : PartModule {
 	}
 
 	private void UpdateCapturedModules() {
+		bool foundNewModule = false;
 		foreach( DualModuleEngines engine in part.GetDualModuleEngines() ) {
 			if( engines.Any( m => m.engine.module.Equals( engine.module ) ) ) {
 				continue;
 			}
 
-			Logging.Trace( "Found a new engine module, capturing it" );
+			Logging.Trace( "Engine module detected, attaching it" );
 			engines.Add( new EngineEmitters( engine ) );
+			foundNewModule = true;
 		}
 
-		Logging.Trace( "Number of captures modules: " + engines.Count );
+		if( foundNewModule ) {
+			Logging.Trace( String.Format( "Part {0} [{1}] now has {2} detected engine modules", part.name,
+				part.GetHashCode(), engines.Count ) );
+		}
 	}
 
 	private void ProcessModule( EngineEmitters module ) {
-		Logging.Trace( "Processing module " + module.GetHashCode() );
+		// TODO extract method
 		if( !module.engine.isEnabled || !module.engine.isIgnited || module.engine.isFlameout || !module.engine.HasThrust() ) {
 			foreach( ParticleEmitter emitter in module.emitters ) {
-				// TODO this will remove the emitters instantly, but it should just go away smoothly
-				// (i.e. just stop emitting and set them to active once all particles are gone)
-				emitter.gameObject.SetActive( false );
+				emitter.emit = false;
+				if( emitter.particleCount == 0 ) {
+					emitter.gameObject.SetActive( false );
+				}
 			}
 
 			return;
@@ -52,8 +58,9 @@ public class DustyPartModule : PartModule {
 		// TODO rewrite this weird double-list construct into a separate DustyTransform class
 		int i = 0;
 		foreach( ParticleEmitter emitter in module.emitters ) {
+			emitter.emit = true;
 			Transform thrust = module.engine.thrustTransforms[i];
-			Logging.Trace( "current: " + thrust ?? "nothin" );
+
 			// TODO Don't use infinity, but account for tilted ships
 			RaycastHit thrustTargetOnSurface;
 			bool hit = Physics.Raycast( part.transform.position, thrust.forward, out thrustTargetOnSurface,
