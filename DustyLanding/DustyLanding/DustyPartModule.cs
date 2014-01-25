@@ -43,8 +43,7 @@ public class DustyPartModule : PartModule {
 	}
 
 	private void ProcessModule( EngineEmitters module ) {
-		// TODO extract method
-		if( !module.engine.isEnabled || !module.engine.isIgnited || module.engine.isFlameout || !module.engine.HasThrust() ) {
+		if( !IsEngineActive( module.engine ) ) {
 			foreach( ParticleEmitter emitter in module.emitters ) {
 				emitter.emit = false;
 				if( emitter.particleCount == 0 ) {
@@ -82,6 +81,10 @@ public class DustyPartModule : PartModule {
 				emitter.transform.Rotate( 90, 0, 0 );
 			}
 		}
+	}
+
+	private bool IsEngineActive( DualModuleEngines engine ) {
+		return engine.isEnabled && engine.isIgnited && !engine.isFlameout && engine.HasThrust();
 	}
 }
 
