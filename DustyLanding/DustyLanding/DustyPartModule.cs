@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using KSP;
 
+[ReflectivelyUsed]
 public class DustyPartModule : PartModule {
 	public const string MODULE_NAME = "DustyPartModule";
 	private const int LAYER_MASK = 1 << 15;

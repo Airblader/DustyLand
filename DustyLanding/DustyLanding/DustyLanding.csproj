@@ -40,10 +40,12 @@
     <Compile Include="DustyPartModule.cs" />
     <Compile Include="DustyLanding.cs" />
     <Compile Include="EngineEmitters.cs" />
+    <Compile Include="Attributes\ReflectivelyUsed.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Extensions\" />
     <Folder Include="Log\" />
+    <Folder Include="Attributes\" />
   </ItemGroup>
 </Project>
