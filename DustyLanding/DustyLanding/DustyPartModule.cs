@@ -42,20 +42,20 @@ public class DustyPartModule : PartModule {
 		}
 	}
 
-	private void ProcessModule( EngineEmitters module ) {
-		if( !IsEngineActive( module.engine ) ) {
-			DeactivateEmitters( module );
+	private void ProcessModule( EngineEmitters engineEmitter ) {
+		if( !IsEngineActive( engineEmitter.engine ) ) {
+			DeactivateEmitters( engineEmitter );
 			return;
 		}
 
 		// TODO rewrite this weird double-list construct into a separate DustyTransform class
 		int i = 0;
-		foreach( ParticleEmitter emitter in module.emitters ) {
-			ProcessEmitter( module, emitter, module.engine.thrustTransforms[i] );
+		foreach( ParticleEmitter emitter in engineEmitter.emitters ) {
+			ProcessEmitter( engineEmitter, emitter, engineEmitter.engine.thrustTransforms[i] );
 		}
 	}
 
-	private void ProcessEmitter( EngineEmitters module, ParticleEmitter emitter, Transform thrust ) {
+	private void ProcessEmitter( EngineEmitters engineEmitter, ParticleEmitter emitter, Transform thrust ) {
 		emitter.emit = true;
 		emitter.gameObject.SetActive( true );
 
@@ -86,8 +86,8 @@ public class DustyPartModule : PartModule {
 		return engine.isEnabled && engine.isIgnited && !engine.isFlameout && engine.HasThrust();
 	}
 
-	private void DeactivateEmitters( EngineEmitters module ) {
-		foreach( ParticleEmitter emitter in module.emitters ) {
+	private void DeactivateEmitters( EngineEmitters engineEmitter ) {
+		foreach( ParticleEmitter emitter in engineEmitter.emitters ) {
 			DeactivateEmitter( emitter );
 		}
 	}
