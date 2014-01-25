@@ -20,9 +20,7 @@ public class EngineEmitters {
 			return;
 		}
 
-		foreach( EngineEmitter emitter in emitters ) {
-			emitter.Process();
-		}
+		emitters.ForEach( emitter => emitter.Process() );
 	}
 
 	private bool IsEngineActive() {
