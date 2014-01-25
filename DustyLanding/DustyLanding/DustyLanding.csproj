@@ -41,6 +41,7 @@
     <Compile Include="DustyLanding.cs" />
     <Compile Include="EngineEmitters.cs" />
     <Compile Include="Attributes\ReflectivelyUsed.cs" />
+    <Compile Include="EngineEmitter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

@@ -21,7 +21,7 @@ public class DustyPartModule : PartModule {
 		}
 
 		UpdateCapturedModules();
-		engines.ForEach( module => ProcessModule( module ) );
+		engines.ForEach( engine => ProcessEngine( engine ) );
 	}
 
 	private void UpdateCapturedModules() {
@@ -42,61 +42,59 @@ public class DustyPartModule : PartModule {
 		}
 	}
 
-	private void ProcessModule( EngineEmitters engineEmitter ) {
-		if( !IsEngineActive( engineEmitter.engine ) ) {
-			DeactivateEmitters( engineEmitter );
+	private void ProcessEngine( EngineEmitters engine ) {
+		if( !IsEngineActive( engine.engine ) ) {
+			DeactivateEmitters( engine );
 			return;
 		}
 
-		// TODO rewrite this weird double-list construct into a separate DustyTransform class
-		int i = 0;
-		foreach( ParticleEmitter emitter in engineEmitter.emitters ) {
-			ProcessEmitter( engineEmitter, emitter, engineEmitter.engine.thrustTransforms[i] );
+		foreach( EngineEmitter emitter in engine.emitters ) {
+			ProcessEmitter( emitter );
 		}
 	}
 
-	private void ProcessEmitter( EngineEmitters engineEmitter, ParticleEmitter emitter, Transform thrust ) {
-		emitter.emit = true;
-		emitter.gameObject.SetActive( true );
+	private void ProcessEmitter( EngineEmitter emitter ) {
+		emitter.emitter.emit = true;
+		emitter.emitter.gameObject.SetActive( true );
 
 		// TODO Don't use infinity, but account for tilted ships
 		// TODO consider distance, too
 		RaycastHit thrustTargetOnSurface;
-		bool hit = Physics.Raycast( part.transform.position, thrust.forward, out thrustTargetOnSurface,
+		bool hit = Physics.Raycast( part.transform.position, emitter.thruster.forward, out thrustTargetOnSurface,
 			           Mathf.Infinity, LAYER_MASK );
 
 		if( hit ) {
-			emitter.transform.parent = part.transform;
-			emitter.transform.position = thrustTargetOnSurface.point - 0.5f * thrust.forward.normalized;
+			emitter.emitter.transform.parent = part.transform;
+			emitter.emitter.transform.position = thrustTargetOnSurface.point - 0.5f * emitter.thruster.forward.normalized;
 
 			// TODO reuse this when setting localVelocity here
 			//float angle = Vector3.Angle( thrust.eulerAngles, thrustTargetOnSurface.normal );
 			//emitter.transform.Rotate( 90, 90 - angle, 0 );
 
 			// TODO currently has no effect because localVelocity = 0
-			emitter.transform.LookAt( thrust.position );
+			emitter.emitter.transform.LookAt( emitter.thruster.position );
 			// TODO account for this when setting localVelocity
-			emitter.transform.Rotate( 90, 0, 0 );
+			emitter.emitter.transform.Rotate( 90, 0, 0 );
 		} else {
 			DeactivateEmitter( emitter );
 		}
 	}
 
-	private bool IsEngineActive( DualModuleEngines engine ) {
-		return engine.isEnabled && engine.isIgnited && !engine.isFlameout && engine.HasThrust();
+	private bool IsEngineActive( DualModuleEngines engineModule ) {
+		return engineModule.isEnabled && engineModule.isIgnited && !engineModule.isFlameout && engineModule.HasThrust();
 	}
 
-	private void DeactivateEmitters( EngineEmitters engineEmitter ) {
-		foreach( ParticleEmitter emitter in engineEmitter.emitters ) {
+	private void DeactivateEmitters( EngineEmitters engine ) {
+		foreach( EngineEmitter emitter in engine.emitters ) {
 			DeactivateEmitter( emitter );
 		}
 	}
 
-	private void DeactivateEmitter( ParticleEmitter emitter ) {
-		emitter.emit = false;
+	private void DeactivateEmitter( EngineEmitter emitter ) {
+		emitter.emitter.emit = false;
 
-		if( emitter.particleCount == 0 ) {
-			emitter.gameObject.SetActive( false );
+		if( emitter.emitter.particleCount == 0 ) {
+			emitter.emitter.gameObject.SetActive( false );
 		}
 	}
 }

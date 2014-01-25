@@ -5,12 +5,12 @@ using KSP;
 
 public class EngineEmitters {
 	public readonly DualModuleEngines engine;
-	public List<ParticleEmitter> emitters = new List<ParticleEmitter>();
+	public List<EngineEmitter> emitters = new List<EngineEmitter>();
 
 	public EngineEmitters( DualModuleEngines engine ) {
 		this.engine = engine;
 		foreach( Transform thrust in engine.thrustTransforms ) {
-			emitters.Add( CreateParticleEmitter( engine.module.part ) );
+			emitters.Add( new EngineEmitter( CreateParticleEmitter( engine.module.part ), thrust ) );
 		}
 	}
 
