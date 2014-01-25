@@ -16,7 +16,7 @@ public class EngineEmitters {
 
 	public void Process() {
 		if( !IsEngineActive() ) {
-			DeactivateEmitters();
+			emitters.ForEach( emitter => emitter.Deactivate() );
 			return;
 		}
 
@@ -27,12 +27,6 @@ public class EngineEmitters {
 
 	private bool IsEngineActive() {
 		return engine.isEnabled && engine.isIgnited && !engine.isFlameout && engine.HasThrust();
-	}
-
-	private void DeactivateEmitters() {
-		foreach( EngineEmitter emitter in emitters ) {
-			emitter.Deactivate();
-		}
 	}
 
 	private ParticleEmitter CreateParticleEmitter( Part part ) {
