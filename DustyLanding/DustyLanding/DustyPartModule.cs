@@ -44,7 +44,7 @@ public class DustyPartModule : PartModule {
 
 	private void ProcessModule( EngineEmitters module ) {
 		if( !IsEngineActive( module.engine ) ) {
-			DeactivateEngine( module );
+			DeactivateEmitters( module );
 			return;
 		}
 
@@ -52,14 +52,15 @@ public class DustyPartModule : PartModule {
 		int i = 0;
 		foreach( ParticleEmitter emitter in module.emitters ) {
 			emitter.emit = true;
+			emitter.gameObject.SetActive( true );
+
 			Transform thrust = module.engine.thrustTransforms[i];
 
 			// TODO Don't use infinity, but account for tilted ships
+			// TODO consider distance, too
 			RaycastHit thrustTargetOnSurface;
 			bool hit = Physics.Raycast( part.transform.position, thrust.forward, out thrustTargetOnSurface,
 				           Mathf.Infinity, LAYER_MASK );
-			// TODO consider distance, too
-			emitter.gameObject.SetActive( hit );
 
 			if( hit ) {
 				emitter.transform.parent = part.transform;
@@ -73,6 +74,8 @@ public class DustyPartModule : PartModule {
 				emitter.transform.LookAt( thrust.position );
 				// TODO account for this when setting localVelocity
 				emitter.transform.Rotate( 90, 0, 0 );
+			} else {
+				DeactivateEmitter( emitter );
 			}
 		}
 	}
@@ -81,13 +84,17 @@ public class DustyPartModule : PartModule {
 		return engine.isEnabled && engine.isIgnited && !engine.isFlameout && engine.HasThrust();
 	}
 
-	private void DeactivateEngine( EngineEmitters module ) {
+	private void DeactivateEmitters( EngineEmitters module ) {
 		foreach( ParticleEmitter emitter in module.emitters ) {
-			emitter.emit = false;
+			DeactivateEmitter( emitter );
+		}
+	}
 
-			if( emitter.particleCount == 0 ) {
-				emitter.gameObject.SetActive( false );
-			}
+	private void DeactivateEmitter( ParticleEmitter emitter ) {
+		emitter.emit = false;
+
+		if( emitter.particleCount == 0 ) {
+			emitter.gameObject.SetActive( false );
 		}
 	}
 }
