@@ -27,7 +27,7 @@ public class DustyPartModule : PartModule {
 	private void UpdateCapturedModules() {
 		bool foundNewModule = false;
 		foreach( DualModuleEngines engine in part.GetDualModuleEngines() ) {
-			if( engines.Any( m => m.engine.module.Equals( engine.module ) ) ) {
+			if( engines.Any( engineEmitter => engineEmitter.engine.module.Equals( engine.module ) ) ) {
 				continue;
 			}
 
