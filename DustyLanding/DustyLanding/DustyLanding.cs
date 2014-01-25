@@ -30,7 +30,7 @@ public class DustyLanding : MonoBehaviour {
 				continue;
 			}
 
-			part.AddModule( DustyPartModule.MODULE_NAME );
+			part.AddModule( typeof( DustyPartModule ).Name );
 		}
 	}
 }

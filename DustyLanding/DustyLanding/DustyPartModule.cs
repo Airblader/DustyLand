@@ -6,7 +6,6 @@ using KSP;
 
 [ReflectivelyUsed]
 public class DustyPartModule : PartModule {
-	public const string MODULE_NAME = "DustyPartModule";
 	private const int LAYER_MASK = 1 << 15;
 	private List<EngineEmitters> engines = new List<EngineEmitters>();
 
