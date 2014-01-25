@@ -27,7 +27,6 @@ public class EngineEmitter {
 			emitter.emit = true;
 			emitter.gameObject.SetActive( true );
 
-			emitter.transform.parent = part.transform;
 			emitter.transform.position = thrustTargetOnSurface.point - 0.5f * thruster.forward.normalized;
 
 			// TODO reuse this when setting localVelocity here
