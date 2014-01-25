@@ -7,14 +7,13 @@ using KSP;
 public class DustyPartModule : PartModule {
 	public const string MODULE_NAME = "DustyPartModule";
 	private const int LAYER_MASK = 1 << 15;
-	// TODO name
-	private List<DustyEngineModule> engineModules = new List<DustyEngineModule>();
-	// TODO name
-	private class DustyEngineModule {
+	private List<EngineEmitters> engines = new List<EngineEmitters>();
+
+	private class EngineEmitters {
 		public readonly DualModuleEngines engine;
 		public List<ParticleEmitter> emitters = new List<ParticleEmitter>();
 
-		public DustyEngineModule( DualModuleEngines engine ) {
+		public EngineEmitters( DualModuleEngines engine ) {
 			this.engine = engine;
 			foreach( Transform thrust in engine.thrustTransforms ) {
 				emitters.Add( CreateParticleEmitter( engine.module.part ) );
@@ -54,23 +53,23 @@ public class DustyPartModule : PartModule {
 		}
 
 		UpdateCapturedModules();
-		engineModules.ForEach( module => ProcessModule( module ) );
+		engines.ForEach( module => ProcessModule( module ) );
 	}
 
 	private void UpdateCapturedModules() {
 		foreach( DualModuleEngines engine in part.GetDualModuleEngines() ) {
-			if( engineModules.Any( m => m.engine.module.Equals( engine.module ) ) ) {
+			if( engines.Any( m => m.engine.module.Equals( engine.module ) ) ) {
 				continue;
 			}
 
 			Logging.Trace( "Found a new engine module, capturing it" );
-			engineModules.Add( new DustyEngineModule( engine ) );
+			engines.Add( new EngineEmitters( engine ) );
 		}
 
-		Logging.Trace( "Number of captures modules: " + engineModules.Count );
+		Logging.Trace( "Number of captures modules: " + engines.Count );
 	}
 
-	private void ProcessModule( DustyEngineModule module ) {
+	private void ProcessModule( EngineEmitters module ) {
 		Logging.Trace( "Processing module " + module.GetHashCode() );
 		if( !module.engine.isEnabled || !module.engine.isIgnited || module.engine.isFlameout || !module.engine.HasThrust() ) {
 			foreach( ParticleEmitter emitter in module.emitters ) {
