@@ -5,69 +5,79 @@ using UnityEngine;
 using KSP;
 
 /// Plan:
-/// 1. The main MonoBehaviour shall frequently query all parts of the ship
-/// 	- If any part with an engine module is found that does not yet have a
-/// 	  dusty engine, it shall be added
-/// 	- Otherwise, nothing
 /// 2. The dusty engine module goes over every attached engine module and
 ///    collects the thrust transforms to display emitters accordingly.
 
-public class DustyPartModule : PartModule, IDisposable {
+public class DustyPartModule : PartModule {
 	public const string MODULE_NAME = "DustyPartModule";
 	private const int LAYER_MASK = 1 << 15;
-	private FXGroup fxDust;
+	// TODO name
+	private List<DustyEngineModule> engineModules = new List<DustyEngineModule>();
+	// TODO name
+	private class DustyEngineModule {
+		public readonly DualModuleEngines engine;
+		public List<ParticleEmitter> emitters = new List<ParticleEmitter>();
+
+		public DustyEngineModule( DualModuleEngines engine ) {
+			this.engine = engine;
+			foreach( Transform thrust in engine.thrustTransforms ) {
+				emitters.Add( CreateParticleEmitter( engine.module.part ) );
+			}
+		}
+
+		private ParticleEmitter CreateParticleEmitter( Part part ) {
+			GameObject emitterGameObject = (GameObject) UnityEngine.Object.Instantiate( UnityEngine.Resources.Load( "Effects/fx_smokeTrail_medium" ) );
+			emitterGameObject.transform.parent = part.transform;
+			emitterGameObject.transform.localRotation = Quaternion.identity;
+			emitterGameObject.SetActive( false );
+
+			ParticleEmitter emitter = emitterGameObject.GetComponent<ParticleEmitter>();
+			emitter.maxEmission = 10;
+			emitter.maxEnergy = 5;
+			emitter.maxSize = 7;
+			emitter.minEmission = 3;
+			emitter.minEnergy = 1;
+			emitter.minSize = 1;
+
+			// TODO this can be updated in each update cycle to account for tilt
+			emitter.localVelocity = new Vector3( 0, 0, 0 );
+
+			return emitter;
+		}
+	}
 
 	override public void OnAwake() {
-		if( !part.HasEngineModule() ) {
-			throw new ApplicationException( "The part is not an engine" );
-		}
-
-		InitFx();
-		Logging.Log( "Module woke up for " + part.name );
+		Logging.Trace( "Woke up for part = " + part.name ?? "<unknown>" );
+		InvokeRepeating( "Process", 0.0f, 0.1f );
 	}
 
-	override public void OnStart( StartState state ) {
-		// TODO will this ever be called?
-		if( state.IsOneOf( StartState.None, StartState.Editor ) || HighLogic.LoadedScene != GameScenes.FLIGHT ) {
-			Logging.Log( "Not in correct state or scene, aborting" );
-			return;
-		}
-
-		if( vessel == null ) {
-			throw new MissingComponentException( "Part is not attached to a vessel" );
-		}
-	}
-
-	override public void OnFixedUpdate() {
-		// TODO do Awake, OnStart here?
+	private void Process() {
+		Logging.Trace( "Processing for part " + part.name ?? "<unknown>" );
 		if( !FlightGlobals.ready ) {
 			return;
 		}
 
-		try {
-			UpdateEmitters();
-		} catch( Exception e ) {
-			Logging.Error( "Exception while updating emitters", e );
-		}
+		UpdateCapturedModules();
+		engineModules.ForEach( module => ProcessModule( module ) );
 	}
 
-	public void Dispose() {
-		if( fxDust == null ) {
-			return;
+	private void UpdateCapturedModules() {
+		foreach( DualModuleEngines engine in part.GetDualModuleEngines() ) {
+			if( engineModules.Any( m => m.engine.module.Equals( engine.module ) ) ) {
+				continue;
+			}
+
+			Logging.Trace( "Found a new engine module, capturing it" );
+			engineModules.Add( new DustyEngineModule( engine ) );
 		}
 
-		DestroyFx();
+		Logging.Trace( "Number of captures modules: " + engineModules.Count );
 	}
 
-	private void UpdateEmitters() {
-		DualModuleEngines engine = part.GetDualModuleEngines()[0];
-		if( engine == null ) {
-			Logging.Log( "Engine module not found" );
-			return;
-		}
-
-		if( !engine.isEnabled || !engine.isIgnited || engine.isFlameout || !engine.HasThrust() ) {
-			foreach( ParticleEmitter emitter in fxDust.fxEmitters ) {
+	private void ProcessModule( DustyEngineModule module ) {
+		Logging.Trace( "Processing module " + module.GetHashCode() );
+		if( !module.engine.isEnabled || !module.engine.isIgnited || module.engine.isFlameout || !module.engine.HasThrust() ) {
+			foreach( ParticleEmitter emitter in module.emitters ) {
 				// TODO this will remove the emitters instantly, but it should just go away smoothly
 				// (i.e. just stop emitting and set them to active once all particles are gone)
 				emitter.gameObject.SetActive( false );
@@ -76,74 +86,31 @@ public class DustyPartModule : PartModule, IDisposable {
 			return;
 		}
 
-		foreach( ParticleEmitter emitter in fxDust.fxEmitters ) {
-			UpdateEmitter( emitter, engine );
-		}
-	}
+		// TODO rewrite this weird double-list construct into a separate DustyTransform class
+		int i = 0;
+		foreach( ParticleEmitter emitter in module.emitters ) {
+			Transform thrust = module.engine.thrustTransforms[i];
+			Logging.Trace( "current: " + thrust ?? "nothin" );
+			// TODO Don't use infinity, but account for tilted ships
+			RaycastHit thrustTargetOnSurface;
+			bool hit = Physics.Raycast( part.transform.position, thrust.forward, out thrustTargetOnSurface,
+				           Mathf.Infinity, LAYER_MASK );
+			// TODO consider distance, too
+			emitter.gameObject.SetActive( hit );
 
-	private void UpdateEmitter( ParticleEmitter emitter, DualModuleEngines engine ) {
-		// TODO remove this and add emitters for all thrusters
-		if( engine.thrustTransforms.Count == 0 ) {
-			return;
-		}
+			if( hit ) {
+				emitter.transform.parent = part.transform;
+				emitter.transform.position = thrustTargetOnSurface.point - 0.5f * thrust.forward.normalized;
 
-		// TODO Don't use infinity, but account for tilted ships
-		RaycastHit thrustTargetOnSurface;
-		bool hit = Physics.Raycast( part.transform.position, engine.thrustTransforms[0].forward, out thrustTargetOnSurface,
-			           Mathf.Infinity, LAYER_MASK );
-		// TODO consider distance, too
-		emitter.gameObject.SetActive( hit );
+				// TODO reuse this when setting localVelocity here
+				//float angle = Vector3.Angle( thrust.eulerAngles, thrustTargetOnSurface.normal );
+				//emitter.transform.Rotate( 90, 90 - angle, 0 );
 
-		if( hit ) {
-			emitter.transform.parent = part.transform;
-			emitter.transform.position = thrustTargetOnSurface.point - 0.5f * engine.thrustTransforms[0].forward.normalized;
-
-			// TODO reuse this when setting localVelocity here
-			//float angle = Vector3.Angle( module.thrustTransforms[0].eulerAngles, thrustTargetOnSurface.normal );
-			//emitter.transform.Rotate( 90, 90 - angle, 0 );
-
-			// TODO currently has no effect because localVelocity = 0
-			emitter.transform.LookAt( engine.thrustTransforms[0].position );
-			// TODO account for this when setting localVelocity
-			emitter.transform.Rotate( 90, 0, 0 );
-		}
-	}
-
-	private void InitFx() {
-		Logging.Log( "Initialize particle emitters" );
-
-		if( fxDust != null ) {
-			DestroyFx();
-		}
-
-		fxDust = new FXGroup( vessel.vesselName );
-		// TODO maybe use a set of ~8 emitters arranged in a circle
-		fxDust.fxEmitters.Add( CreateParticleEmitter( "fx_smokeTrail_medium" ) );
-	}
-
-	private ParticleEmitter CreateParticleEmitter( string fxName ) {
-		GameObject emitterGameObject = (GameObject) UnityEngine.Object.Instantiate( UnityEngine.Resources.Load( "Effects/" + fxName ) );
-		emitterGameObject.transform.parent = part.transform;
-		emitterGameObject.transform.localRotation = Quaternion.identity;
-		emitterGameObject.SetActive( false );
-
-		ParticleEmitter emitter = emitterGameObject.GetComponent<ParticleEmitter>();
-		emitter.maxEmission = 10;
-		emitter.maxEnergy = 5;
-		emitter.maxSize = 7;
-		emitter.minEmission = 3;
-		emitter.minEnergy = 1;
-		emitter.minSize = 1;
-
-		// TODO this can be updated in each update cycle to account for tilt
-		emitter.localVelocity = new Vector3( 0, 0, 0 );
-
-		return emitter;
-	}
-
-	private void DestroyFx() {
-		foreach( ParticleEmitter emitter in fxDust.fxEmitters ) {
-			GameObject.DestroyImmediate( emitter );
+				// TODO currently has no effect because localVelocity = 0
+				emitter.transform.LookAt( thrust.position );
+				// TODO account for this when setting localVelocity
+				emitter.transform.Rotate( 90, 0, 0 );
+			}
 		}
 	}
 }
