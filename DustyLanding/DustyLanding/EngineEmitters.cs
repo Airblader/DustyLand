@@ -15,7 +15,7 @@ public class EngineEmitters {
 	}
 
 	private ParticleEmitter CreateParticleEmitter( Part part ) {
-		GameObject emitterGameObject = (GameObject) UnityEngine.Object.Instantiate( UnityEngine.Resources.Load( "Effects/fx_smokeTrail_medium" ) );
+		GameObject emitterGameObject = (GameObject) UnityEngine.Object.Instantiate( UnityEngine.Resources.Load( "Effects/fx_smokeTrail_light" ) );
 		emitterGameObject.transform.parent = part.transform;
 		emitterGameObject.transform.localRotation = Quaternion.identity;
 		emitterGameObject.SetActive( false );
