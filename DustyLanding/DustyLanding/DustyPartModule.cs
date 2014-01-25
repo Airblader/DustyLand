@@ -51,32 +51,34 @@ public class DustyPartModule : PartModule {
 		// TODO rewrite this weird double-list construct into a separate DustyTransform class
 		int i = 0;
 		foreach( ParticleEmitter emitter in module.emitters ) {
-			emitter.emit = true;
-			emitter.gameObject.SetActive( true );
+			ProcessEmitter( module, emitter, module.engine.thrustTransforms[i] );
+		}
+	}
 
-			Transform thrust = module.engine.thrustTransforms[i];
+	private void ProcessEmitter( EngineEmitters module, ParticleEmitter emitter, Transform thrust ) {
+		emitter.emit = true;
+		emitter.gameObject.SetActive( true );
 
-			// TODO Don't use infinity, but account for tilted ships
-			// TODO consider distance, too
-			RaycastHit thrustTargetOnSurface;
-			bool hit = Physics.Raycast( part.transform.position, thrust.forward, out thrustTargetOnSurface,
-				           Mathf.Infinity, LAYER_MASK );
+		// TODO Don't use infinity, but account for tilted ships
+		// TODO consider distance, too
+		RaycastHit thrustTargetOnSurface;
+		bool hit = Physics.Raycast( part.transform.position, thrust.forward, out thrustTargetOnSurface,
+			           Mathf.Infinity, LAYER_MASK );
 
-			if( hit ) {
-				emitter.transform.parent = part.transform;
-				emitter.transform.position = thrustTargetOnSurface.point - 0.5f * thrust.forward.normalized;
+		if( hit ) {
+			emitter.transform.parent = part.transform;
+			emitter.transform.position = thrustTargetOnSurface.point - 0.5f * thrust.forward.normalized;
 
-				// TODO reuse this when setting localVelocity here
-				//float angle = Vector3.Angle( thrust.eulerAngles, thrustTargetOnSurface.normal );
-				//emitter.transform.Rotate( 90, 90 - angle, 0 );
+			// TODO reuse this when setting localVelocity here
+			//float angle = Vector3.Angle( thrust.eulerAngles, thrustTargetOnSurface.normal );
+			//emitter.transform.Rotate( 90, 90 - angle, 0 );
 
-				// TODO currently has no effect because localVelocity = 0
-				emitter.transform.LookAt( thrust.position );
-				// TODO account for this when setting localVelocity
-				emitter.transform.Rotate( 90, 0, 0 );
-			} else {
-				DeactivateEmitter( emitter );
-			}
+			// TODO currently has no effect because localVelocity = 0
+			emitter.transform.LookAt( thrust.position );
+			// TODO account for this when setting localVelocity
+			emitter.transform.Rotate( 90, 0, 0 );
+		} else {
+			DeactivateEmitter( emitter );
 		}
 	}
 
