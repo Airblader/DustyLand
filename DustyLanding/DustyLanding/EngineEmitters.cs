@@ -5,12 +5,33 @@ using KSP;
 
 public class EngineEmitters {
 	public readonly DualModuleEngines engine;
-	public List<EngineEmitter> emitters = new List<EngineEmitter>();
+	private List<EngineEmitter> emitters = new List<EngineEmitter>();
 
-	public EngineEmitters( DualModuleEngines engine ) {
+	public EngineEmitters( Part part, DualModuleEngines engine ) {
 		this.engine = engine;
 		foreach( Transform thrust in engine.thrustTransforms ) {
-			emitters.Add( new EngineEmitter( CreateParticleEmitter( engine.module.part ), thrust ) );
+			emitters.Add( new EngineEmitter( part, CreateParticleEmitter( engine.module.part ), thrust ) );
+		}
+	}
+
+	public void Process() {
+		if( !IsEngineActive() ) {
+			DeactivateEmitters();
+			return;
+		}
+
+		foreach( EngineEmitter emitter in emitters ) {
+			emitter.Process();
+		}
+	}
+
+	private bool IsEngineActive() {
+		return engine.isEnabled && engine.isIgnited && !engine.isFlameout && engine.HasThrust();
+	}
+
+	private void DeactivateEmitters() {
+		foreach( EngineEmitter emitter in emitters ) {
+			emitter.Deactivate();
 		}
 	}
 
