@@ -25,13 +25,13 @@ public class DustyPartModule : PartModule {
 
 	private void UpdateCapturedModules() {
 		bool foundNewModule = false;
-		foreach( DualModuleEngines engine in part.GetDualModuleEngines() ) {
-			if( engines.Any( engineEmitter => engineEmitter.engine.module.Equals( engine.module ) ) ) {
+		foreach( DualModuleEngines engineModule in part.GetDualModuleEngines() ) {
+			if( isCaptured( engineModule ) ) {
 				continue;
 			}
 
 			Logging.Trace( "Engine module detected, attaching it" );
-			engines.Add( new EngineEmitters( part, engine ) );
+			engines.Add( new EngineEmitters( part, engineModule ) );
 			foundNewModule = true;
 		}
 
@@ -39,6 +39,10 @@ public class DustyPartModule : PartModule {
 			Logging.Trace( String.Format( "Part {0} [{1}] now has {2} detected engine modules", part.name,
 				part.GetHashCode(), engines.Count ) );
 		}
+	}
+
+	private bool isCaptured( DualModuleEngines engineModule ) {
+		return engines.Any( engineEmitter => engineEmitter.engine.module.Equals( engineModule.module ) );
 	}
 }
 
