@@ -6,7 +6,7 @@ using UnityEngine;
 using KSP;
 
 [KSPAddon( KSPAddon.Startup.Flight, false )]
-public class DustLanding : MonoBehaviour {
+public class DustyLanding : MonoBehaviour {
 	private Vessel vessel {
 		get {
 			return FlightGlobals.fetch.activeVessel;
@@ -14,6 +14,7 @@ public class DustLanding : MonoBehaviour {
 	}
 
 	public void Start() {
+		// TODO a second might be a little much
 		InvokeRepeating( "ScanVesselParts", 0.0f, 1.0f );
 	}
 
