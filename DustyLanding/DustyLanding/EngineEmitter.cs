@@ -17,9 +17,6 @@ public class EngineEmitter {
 	}
 
 	public void Process() {
-		emitter.emit = true;
-		emitter.gameObject.SetActive( true );
-
 		// TODO Don't use infinity, but account for tilted ships
 		// TODO consider distance, too
 		RaycastHit thrustTargetOnSurface;
@@ -27,6 +24,9 @@ public class EngineEmitter {
 			           Mathf.Infinity, LAYER_MASK );
 
 		if( hit ) {
+			emitter.emit = true;
+			emitter.gameObject.SetActive( true );
+
 			emitter.transform.parent = part.transform;
 			emitter.transform.position = thrustTargetOnSurface.point - 0.5f * thruster.forward.normalized;
 
