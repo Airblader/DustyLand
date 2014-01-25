@@ -44,13 +44,7 @@ public class DustyPartModule : PartModule {
 
 	private void ProcessModule( EngineEmitters module ) {
 		if( !IsEngineActive( module.engine ) ) {
-			foreach( ParticleEmitter emitter in module.emitters ) {
-				emitter.emit = false;
-				if( emitter.particleCount == 0 ) {
-					emitter.gameObject.SetActive( false );
-				}
-			}
-
+			DeactivateEngine( module );
 			return;
 		}
 
@@ -85,6 +79,16 @@ public class DustyPartModule : PartModule {
 
 	private bool IsEngineActive( DualModuleEngines engine ) {
 		return engine.isEnabled && engine.isIgnited && !engine.isFlameout && engine.HasThrust();
+	}
+
+	private void DeactivateEngine( EngineEmitters module ) {
+		foreach( ParticleEmitter emitter in module.emitters ) {
+			emitter.emit = false;
+
+			if( emitter.particleCount == 0 ) {
+				emitter.gameObject.SetActive( false );
+			}
+		}
 	}
 }
 
