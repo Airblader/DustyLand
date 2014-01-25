@@ -51,12 +51,13 @@ public class EngineEmitter {
 	}
 
 	private ParticleEmitter CreateParticleEmitter() {
-		GameObject emitterGameObject = (GameObject) UnityEngine.Object.Instantiate( UnityEngine.Resources.Load( "Effects/fx_smokeTrail_light" ) );
+		GameObject emitterGameObject = UnityEngine.Object.Instantiate( UnityEngine.Resources.Load( "Effects/fx_smokeTrail_light" ) ) as GameObject;
 		emitterGameObject.transform.parent = part.transform;
 		emitterGameObject.transform.localRotation = Quaternion.identity;
 		emitterGameObject.SetActive( false );
 
 		ParticleEmitter emitter = emitterGameObject.GetComponent<ParticleEmitter>();
+		emitter.transform.parent = part.transform;
 		emitter.maxEmission = 10;
 		emitter.maxEnergy = 5;
 		emitter.maxSize = 7;
