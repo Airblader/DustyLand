@@ -39,6 +39,7 @@
     <Compile Include="DualModuleEngines.cs" />
     <Compile Include="DustyPartModule.cs" />
     <Compile Include="DustyLanding.cs" />
+    <Compile Include="EngineEmitters.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
