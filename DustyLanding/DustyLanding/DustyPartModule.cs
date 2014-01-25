@@ -4,10 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using KSP;
 
-/// Plan:
-/// 2. The dusty engine module goes over every attached engine module and
-///    collects the thrust transforms to display emitters accordingly.
-
 public class DustyPartModule : PartModule {
 	public const string MODULE_NAME = "DustyPartModule";
 	private const int LAYER_MASK = 1 << 15;
